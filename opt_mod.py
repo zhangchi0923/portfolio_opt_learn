@@ -13,7 +13,7 @@ def MarkowitzWithRisk(n, mu, wb, GT, gamma, delta, industry, size, industryLimit
         M.constraint('fully invested', Expr.sum(w), Domain.equalsTo(1.0))
 
         # Buy rule
-        M.constraint('buy limit', w, Domain.lessThan(0.01))
+        M.constraint('buy limit', w, Domain.lessThan(0.015))
         M.constraint('long only', w, Domain.greaterThan(0.0))
 
         # Compute risk

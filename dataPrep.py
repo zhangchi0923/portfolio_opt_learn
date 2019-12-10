@@ -4,11 +4,11 @@ import datetime as datetime
 from dateutil.parser import parse
 
 
-thispath = '/Users/zhangchi/富国实习/组合优化/组合优化数据1118'
+thispath = 'C://Users//10993//Documents//富国实习//富国实习//组合优化//组合优化数据1118'
 
 # 预期收益
 def get_mu(date):
-    mu = pd.read_csv(thispath+'/最终结果/'+date+'.csv', index_col=[0])*0.01
+    mu = pd.read_csv(thispath+'//最终结果//'+date+'.csv', index_col=[0])*0.01
     date_idx = [date]*mu.shape[0]
     mu.index = [pd.to_datetime(date_idx), mu.index]
     mu.columns = ['预期收益']
@@ -19,7 +19,7 @@ def get_mu(date):
 # 股票池（沪深300成分内）
 def get_stockPool(pool='hs300'):
     if pool == 'hs300':
-        stockPool = pd.read_csv(thispath + '/HS300成分权重.csv', index_col=[0])
+        stockPool = pd.read_csv(thispath + '//HS300成分权重.csv', index_col=[0])
         stockPool.index = pd.to_datetime(stockPool.index.values)
         index2 = stockPool['代码']
         stockPool.drop('代码', axis=1, inplace=True)
@@ -33,7 +33,7 @@ stlist = ['000001.SZ', '000002.SZ', '000004.SZ', '000011.SZ', '000166.SZ']
 # 协方差矩阵估计
 def get_cov_estimator(stock, date, window=252, method='shrink_id'):
 
-    raw_ret = pd.read_csv(thispath + '/retdata_daily.csv', index_col=[0])
+    raw_ret = pd.read_csv(thispath + '//retdata_daily.csv', index_col=[0])
     date_idx = raw_ret.index.values.tolist().index(date)
     ret = raw_ret.iloc[date_idx:date_idx + window, :]
     ret = ret.loc[:, stock].fillna(0)  # 空值先不管
@@ -44,7 +44,7 @@ def get_cov_estimator(stock, date, window=252, method='shrink_id'):
 
     if method == 'shrink_id':
         # mu estimator
-        # mu_estimator = np.trace(samp_cov)/stock_num
+        # mu_estimator = np.trace(samp_cov)//stock_num
         mu_estimator = np.linalg.norm(samp_cov, 'fro')
         shrink_target = mu_estimator * np.eye(stock_num)
 

@@ -1,12 +1,13 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 import pandas as pd
 from dataPrep import *
 from opt_mod import *
 #设置路径
 
-path = '/Users/zhangchi/富国实习/组合优化/优化器'
-inpath = path+'/Input'
-outpath = path+'/Output'
+path = 'C://Users//10993/Documents//富国实习//富国实习//组合优化//优化器'
+inpath = path+'//Input'
+outpath = path+'//Output'
 
 def change_format(data):
     data.index = pd.to_datetime(data.index.astype(str))
@@ -15,19 +16,19 @@ def change_format(data):
 
 
 def filter_data(data):
-    price = pd.read_csv(open(path + '/Input/复权收盘价.csv'), index_col=[0])
+    price = pd.read_csv(open(path + '//Input//复权收盘价.csv'), index_col=[0])
     price = change_format(price).sort_index().to_frame('月末收盘价')
 
-    state = pd.read_csv(open(path + '/Input/是否在市.csv'), index_col=[0])
+    state = pd.read_csv(open(path + '//Input//是否在市.csv'), index_col=[0])
     state = change_format(state).sort_index().to_frame('state')
 
-    listlen = pd.read_csv(open(path + '/Input/上市天数.csv'), index_col=[0])
+    listlen = pd.read_csv(open(path + '//Input//上市天数.csv'), index_col=[0])
     listlen = change_format(listlen).to_frame('上市天数')
 
-    ST = pd.read_csv(open(path + '/Input/特殊处理.csv'), index_col=[0])
+    ST = pd.read_csv(open(path + '//Input//特殊处理.csv'), index_col=[0])
     ST = change_format(ST).to_frame('特殊处理').fillna(1)
 
-    zhandie = pd.read_csv(open(path + '/Input/涨跌停.csv'), index_col=[0])
+    zhandie = pd.read_csv(open(path + '//Input//涨跌停.csv'), index_col=[0])
     zhandie = change_format(zhandie).to_frame('涨跌停')
 
     data = pd.concat([data, price, state, listlen, ST, zhandie], join_axes=[data.index], axis=1)
@@ -40,20 +41,29 @@ def filter_data(data):
     data.index.names = ['date', 'stcode']
     return data
 
+'''
+准备需要输入的参数：
+    1.股票池
+    2.预期超额收益
+    3.流通市值
+    4.行业
+    5.协方差矩阵（如果用Mosek的话还需要矩阵的cholesky分解）
+    6.基准权重
+'''
 stockPool = get_stockPool()
-mu = get_mu('2018-01-31')
+mu = get_mu('2018-01-31')   # 可将“最终结果”中的文件concat然后再读进来
 
 # 3.市值
-size = pd.read_csv(inpath + '/流通市值.csv', index_col=[0])
+size = pd.read_csv(inpath + '//流通市值.csv', index_col=[0])
 size = change_format(size)
 
 # 4、中信一级行业
-industry = pd.read_csv(inpath + '/中信一级行业.csv', index_col=[0], encoding='gbk')
+industry = pd.read_csv(inpath + '//中信一级行业.csv', index_col=[0], encoding='gbk')
 industry = change_format(industry)
 
 # 5、基准指数
-# base_weight = pd.read_csv(inpath + '/中证500成份权重.csv', index_col=[0])
-base_weight = pd.read_csv(inpath + '/沪深300成份权重.csv', index_col=[0])
+# base_weight = pd.read_csv(inpath + '//中证500成份权重.csv', index_col=[0])
+base_weight = pd.read_csv(inpath + '//沪深300成份权重.csv', index_col=[0])
 base_weight = change_format(base_weight).fillna(0)
 
 stock_data = pd.concat([stockPool, mu, size, industry, base_weight], join_axes=[stockPool.index], axis=1)
@@ -81,4 +91,7 @@ cov = Cov.copy().tolist()
 
 GT = np.linalg.cholesky(cov)
 
+'''
+求解，返回目标权重
+'''
 w = MarkowitzWithRisk(n, mu, wb, GT, gamma, delta, industry, size, industryLimit, sizeLimit)
